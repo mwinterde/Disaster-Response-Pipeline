@@ -1,10 +1,10 @@
 # Disaster Response Pipeline Project
 
+![Webapp](screenshot.png)
+
 ### Motivation
 
 In this project I use data from Figure Eight in order to build a classifier for the categorization of disaster response messages. With the trained classifier I create a web app that takes an input message from the user and outputs a corresponding classification based on all 36 categories.
-
-![Webapp](screenshot.png)
 
 
 ### Instructions
