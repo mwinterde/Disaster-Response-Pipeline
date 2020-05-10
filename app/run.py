@@ -3,9 +3,10 @@ import plotly
 import pandas as pd
 import string
 import nltk
-
-nltk.download('wordnet')
+from collections import Counter
+nltk.download(['wordnet', 'stopwords'])
 from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
@@ -17,8 +18,8 @@ app = Flask(__name__)
 
 def tokenize(text):
     """Simple tokenizer that cleans a given text and splits it into individual
-    tokens. The cleaning process includes the removal of punctuation, lowercasing
-    and lemmatization.
+    tokens. The cleaning process includes the removal of punctuation and stopwords,
+    lowercasing and lemmatization.
 
     Input:
         text (str): raw text
@@ -36,7 +37,8 @@ def tokenize(text):
 
     # Apply lemmatization to words
     lemmatizer = WordNetLemmatizer()
-    lemmas = [lemmatizer.lemmatize(token.strip()) for token in tokens]
+    lemmas = [lemmatizer.lemmatize(token.strip()) for token in tokens
+              if token not in set(stopwords.words('english'))]
 
     return lemmas
 
@@ -53,13 +55,15 @@ model = joblib.load("../models/classifier.pkl")
 @app.route('/')
 @app.route('/index')
 def index():
-    # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
+    # count genres
+    genre_counts = df.genre.value_counts()
     genre_names = list(genre_counts.index)
 
+    # count categories
+    category_counts = df.iloc[:,4:].sum(axis=0).sort_values(ascending=False)
+    category_names = list(category_counts.index)
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
         {
             'data': [
@@ -78,6 +82,26 @@ def index():
                     'title': "Genre"
                 }
             }
+        },
+
+        {
+             'data': [
+                 Bar(
+                     x=category_names,
+                     y=category_counts
+                 )
+             ],
+
+             'layout': {
+                 'title': 'Distribution of Categories',
+                 'yaxis': {
+                     'title': "Count"
+                 },
+                 'xaxis': {
+                     'title': "Category"
+                 }
+             }
+
         }
     ]
 
