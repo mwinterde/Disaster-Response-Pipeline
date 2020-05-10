@@ -62,7 +62,7 @@ def tokenize(text):
 
     # Apply lemmatization to words
     lemmatizer = WordNetLemmatizer()
-    lemmas = [lemmatizer.lemmatize(token) for token in tokens]
+    lemmas = [lemmatizer.lemmatize(token.strip()) for token in tokens]
 
     return lemmas
 
